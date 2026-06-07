@@ -4087,13 +4087,13 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
       <div class="message-actions-menu" id="actions-menu-${messageId || 'temp'}" style="display: none;">
         ${isCurrentUser ? `
           <button class="action-btn react-btn" onclick="showReactionsMenu('${messageId || 'temp'}', document.querySelector('[data-message-id=\"${messageId || 'temp'}\"]'), event)">😊 React</button>
-          <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`')}\`)">↩️ رد</button>
-          ${currentUser && currentUser.email === 'obida@schoolradio.com' ? `<button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`)">📌 تثبيت</button>` : ''}
-          <button class="action-btn edit-btn" onclick="openEditModal('${messageId || 'temp'}', \`${msg.text.replace(/`/g, '\\`')}\`)">✏️ تعديل</button>
+          <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${(msg.text || '').replace(/`/g, '\\`')}\`)">↩️ رد</button>
+          ${currentUser && currentUser.email === 'obida@schoolradio.com' ? `<button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${(msg.text || '').replace(/`/g, '\\`').substring(0, 100)}\`)">📌 تثبيت</button>` : ''}
+          <button class="action-btn edit-btn" onclick="openEditModal('${messageId || 'temp'}', \`${(msg.text || '').replace(/`/g, '\\`')}\`)">✏️ تعديل</button>
           <button class="action-btn delete-btn" onclick="deleteMessage('${messageId || 'temp'}')">🗑️ حذف</button>
         ` : `
           <button class="action-btn react-btn" onclick="showReactionsMenu('${messageId || 'temp'}', document.querySelector('[data-message-id=\"${messageId || 'temp'}\"]'), event)">😊 React</button>
-          <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`')}\`)">↩️ رد</button>
+          <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${(msg.text || '').replace(/`/g, '\\`')}\`)">↩️ رد</button>
         `}
       </div>
       <div class="reactions-menu" id="menu-${messageId || 'temp'}" style="display: none;">
