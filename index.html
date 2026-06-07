@@ -288,6 +288,40 @@
     transform: translateY(0);
   }
 
+  /* ── SYSTEM MESSAGE ── */
+  .message.system {
+    display: flex;
+    justify-content: center;
+    padding: 12px 24px;
+    margin: 8px 0;
+  }
+
+  .message.system .message-avatar {
+    display: none;
+  }
+
+  .message.system .message-content {
+    width: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .system-message-bubble {
+    background: rgba(17, 24, 128, 0.08);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid rgba(17, 24, 128, 0.1);
+    animation: fadeIn .3s ease;
+  }
+
+  .system-message-bubble::before {
+    content: '📌 ';
+  }
+
   /* ── NAV ── */
   nav {
     position: fixed; top: 0; width: 100%; z-index: 100;
@@ -3553,9 +3587,34 @@ let currentFilterSender = ''; // فلتر المرسل الحالي
 let unreadCount = 0; // عدد الرسايل غير المقروءة
 let readMessages = new Set(); // الرسايل المقروءة
 let notificationsEnabled = true; // تفعيل/تعطيل التنبيهات
+let notifiedMessages = new Set(); // لتتبع الرسائل التي تم عرض إشعار عنها
 // currentUser is now managed by login system above
 const CHAT_PASSWORD = '26.27voice';
 const CHAT_ID = 'chat001';
+
+// ────────────────────────────────────────
+// NOTIFICATION PERMISSIONS
+// ────────────────────────────────────────
+function requestNotificationPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        console.log('✅ تم تفعيل الإشعارات');
+        // سجل service worker لدعم push notifications
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('data:application/javascript;base64,KGZ1bmN0aW9uKCkge1xuICBzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ3B1c2gnLCAoZXZlbnQpID0+IHtcbiAgICBjb25zdCBub3RpZmljYXRpb25EYXRhID0gZXZlbnQuZGF0YS5qc29uKCk7XG4gICAgZXZlbnQud2FpdFVudGlsKHNlbGYucmVnaXN0cmF0aW9uLnNob3dOb3RpZmljYXRpb24obm90aWZpY2F0aW9uRGF0YS50aXRsZSwgbm90aWZpY2F0aW9uRGF0YS5vcHRpb25zKSk7XG4gIH0pO1xuICBcbiAgc2VsZi5hZGRFdmVudExpc3RlbmVyKCdtZXNzYWdlJywgKGV2ZW50KSA9PiB7XG4gICAgaWYgKGV2ZW50LmRhdGEudHlwZSA9PT0gJ1NIT1dfTk9USUZJQ0FUSU9OJykge1xuICAgICAgY29uc3QgeyB0aXRsZSwgb3B0aW9ucyB9ID0gZXZlbnQuZGF0YTtcbiAgICAgIHNlbGYucmVnaXN0cmF0aW9uLnNob3dOb3RpZmljYXRpb24odGl0bGUsIG9wdGlvbnMpO1xuICAgIH1cbiAgfSk7XG59KSgpOw==', { scope: '/' }).catch(e => console.log('Service worker registration failed:', e));
+        }
+      }
+    });
+  }
+}
+
+// Request notification permission when page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', requestNotificationPermission);
+} else {
+  requestNotificationPermission();
+}
 
 // ────────────────────────────────────────
 // Floating Chat Button (MODIFIED FOR NEW LOGIN SYSTEM)
@@ -3966,6 +4025,7 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
   }).format(timestamp);
   
   const isCurrentUser = msg.senderId === currentUser?.email;
+  const isSystem = msg.isSystem === true;
   
   // الحصول على الحرف الأول من الاسم للافاتار
   const avatarLetter = msg.senderName ? msg.senderName.charAt(0).toUpperCase() : '👤';
@@ -3978,13 +4038,25 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
     senderName: senderName,
     senderId: msg.senderId,
     isCurrentUser: isCurrentUser,
-    timestamp: timestamp
+    timestamp: timestamp,
+    isSystem: isSystem
   });
   
   const msgEl = document.createElement('div');
-  msgEl.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
+  msgEl.className = `message ${isSystem ? 'system' : (isCurrentUser ? 'sent' : 'received')}`;
   msgEl.id = `msg-${messageId || 'temp'}`;
   msgEl.setAttribute('data-message-id', messageId || 'temp');
+  
+  // إذا كانت رسالة نظام
+  if (isSystem) {
+    msgEl.innerHTML = `
+      <div class="message-content" style="justify-content: center;">
+        <div class="system-message-bubble">${msg.text}</div>
+      </div>
+    `;
+    container.appendChild(msgEl);
+    return;
+  }
   
   // بناء الرسالة بشكل آمن وصحيح
   let userPreviewAttr = '';
@@ -4021,7 +4093,7 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
         ${isCurrentUser ? `
           <button class="action-btn react-btn" onclick="showReactionsMenu('${messageId || 'temp'}', document.querySelector('[data-message-id=\"${messageId || 'temp'}\"]'), event)">😊 React</button>
           <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`')}\`)">↩️ رد</button>
-          <button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`)">📌 تثبيت</button>
+          ${currentUser && currentUser.email === 'obida@schoolradio.com' ? `<button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`, '${msg.senderName}')">📌 تثبيت</button>` : ''}
           <button class="action-btn edit-btn" onclick="openEditModal('${messageId || 'temp'}', \`${msg.text.replace(/`/g, '\\`')}\`)">✏️ تعديل</button>
           <button class="action-btn delete-btn" onclick="deleteMessage('${messageId || 'temp'}')">🗑️ حذف</button>
         ` : `
@@ -4105,8 +4177,8 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
     );
     
     if (repliedToYourMessage) {
-      // تشغيل التنبيه
-      notifyReplyToYou(msg.senderName, msg.text);
+      // تشغيل التنبيه مع messageId لتجنب التكرار
+      notifyReplyToYou(msg.senderName, msg.text, messageId);
     }
   }
   
@@ -5087,8 +5159,17 @@ function updateUnreadBadge() {
   }
 }
 
-function notifyReplyToYou(replierName, messageText) {
+function notifyReplyToYou(replierName, messageText, messageId) {
   if (!notificationsEnabled) return;
+  
+  // تجنب الإشعارات المكررة
+  if (messageId && notifiedMessages.has(messageId)) {
+    return;
+  }
+  
+  if (messageId) {
+    notifiedMessages.add(messageId);
+  }
   
   // تشغيل الصوت
   playNotificationSound();
@@ -5097,13 +5178,40 @@ function notifyReplyToYou(replierName, messageText) {
   const preview = messageText.substring(0, 50) + (messageText.length > 50 ? '...' : '');
   showNotification(`${replierName} رد على رسالتك`, {
     body: preview,
-    tag: 'reply-notification'
+    tag: `reply-${messageId || Date.now()}`
   });
+  
+  // إذا الشات مغلق، اعرض push notification إضافي
+  if (!chatOpen && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      navigator.serviceWorker?.controller?.postMessage({
+        type: 'SHOW_NOTIFICATION',
+        title: `${replierName} رد على رسالتك`,
+        options: {
+          body: preview,
+          icon: '🎙️',
+          badge: '🔔',
+          tag: `reply-${messageId || Date.now()}`
+        }
+      });
+    } catch (e) {
+      console.log('Push notification not available');
+    }
+  }
 }
 
 // ── NEW MESSAGE NOTIFICATION ──
-function notifyNewMessage(senderName, messagePreview) {
+function notifyNewMessage(senderName, messagePreview, messageId) {
   if (!notificationsEnabled) return;
+  
+  // تجنب الإشعارات المكررة
+  if (messageId && notifiedMessages.has(messageId)) {
+    return;
+  }
+  
+  if (messageId) {
+    notifiedMessages.add(messageId);
+  }
   
   // تشغيل الصوت
   playNotificationSound();
@@ -5111,13 +5219,27 @@ function notifyNewMessage(senderName, messagePreview) {
   // عرض الإشعار
   showNotification(`رسالة جديدة من ${senderName}`, {
     body: messagePreview,
-    tag: `msg-${senderName}`,
-    requireInteraction: true
+    tag: `msg-${messageId || senderName}`,
+    requireInteraction: false
   });
   
-  // إذا الشات مغلق، اعرض إشعار إضافي
-  if (!chatOpen) {
-    markMessageAsUnread();
+  // إذا الشات مغلق، اعرض push notification إضافي
+  if (!chatOpen && 'Notification' in window && Notification.permission === 'granted') {
+    try {
+      navigator.serviceWorker?.controller?.postMessage({
+        type: 'SHOW_NOTIFICATION',
+        title: `رسالة جديدة من ${senderName}`,
+        options: {
+          body: messagePreview,
+          icon: '🎙️',
+          badge: '🔔',
+          tag: `msg-${messageId || senderName}`,
+          requireInteraction: true
+        }
+      });
+    } catch (e) {
+      console.log('Push notification not available');
+    }
   }
 }
 
@@ -9113,6 +9235,9 @@ function confirmPin() {
         console.log('✅ تم تثبيت الرسالة');
         closePinModal();
         loadPinnedMessage();
+        
+        // إضافة رسالة نظام في الشات
+        addSystemMessage('Admin pinned a message');
       }
     });
 
@@ -9199,6 +9324,8 @@ function unpinMessage(event) {
       } else {
         console.log('✅ تم إزالة التثبيت');
         hidePinnedBar();
+        // إضافة رسالة نظام في الشات
+        addSystemMessage('Admin unpinned a message');
       }
     });
   }
@@ -9208,5 +9335,29 @@ function unpinMessage(event) {
 setTimeout(() => {
   loadPinnedMessage();
 }, 1000);
+
+// ──────────────────────────────────────────────────
+// SYSTEM MESSAGE FEATURE
+// ──────────────────────────────────────────────────
+
+function addSystemMessage(messageText) {
+  if (!db) return;
+
+  try {
+    const systemMsg = {
+      senderId: 'system',
+      senderName: 'System',
+      text: messageText,
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      isSystem: true
+    };
+
+    db.ref(`chats/${CHAT_ID}/messages`).push(systemMsg).catch(error => {
+      console.error('Error adding system message:', error);
+    });
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
 
 </script>
