@@ -58,6 +58,236 @@
     scrollbar-width: thin;
   }
 
+  /* ── PINNED MESSAGE ── */
+  .pinned-message-bar {
+    background: linear-gradient(135deg, #111880 0%, #2B5EC7 100%);
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--gold);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all .2s;
+    box-shadow: 0 2px 8px rgba(17,24,128,.15);
+  }
+
+  .pinned-message-bar.active {
+    display: flex;
+  }
+
+  .pinned-message-bar:hover {
+    background: linear-gradient(135deg, #2B5EC7 0%, #1a3baa 100%);
+    box-shadow: 0 4px 12px rgba(17,24,128,.25);
+  }
+
+  .pinned-icon {
+    color: var(--gold);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .pinned-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .pinned-name {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,.6);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pinned-text {
+    color: white;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .pinned-close-btn {
+    background: rgba(255,255,255,.1);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+  }
+
+  .pinned-close-btn:hover {
+    background: rgba(255,255,255,.2);
+    transform: scale(1.1);
+  }
+
+  /* ── PIN MESSAGE MODAL ── */
+  .pin-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+
+  .pin-modal.active {
+    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .pin-modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    animation: slideUp .3s ease;
+  }
+
+  .pin-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--bg);
+  }
+
+  .pin-modal-header h3 {
+    margin: 0;
+    color: var(--navy);
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .pin-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--muted);
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all .2s;
+  }
+
+  .pin-close-btn:hover {
+    background: var(--bg);
+    color: var(--navy);
+  }
+
+  .pin-duration-group {
+    margin-bottom: 20px;
+  }
+
+  .pin-duration-label {
+    display: block;
+    color: var(--navy);
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+  }
+
+  .pin-duration-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pin-duration-btn {
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all .2s;
+    text-align: right;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .pin-duration-btn:hover {
+    border-color: var(--gold);
+    background: rgba(201,162,39,.05);
+  }
+
+  .pin-duration-btn.selected {
+    border-color: var(--navy);
+    background: rgba(17,24,128,.08);
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .pin-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .pin-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .pin-btn-cancel {
+    background: #f0f0f0;
+    color: var(--text);
+  }
+
+  .pin-btn-cancel:hover {
+    background: #e0e0e0;
+  }
+
+  .pin-btn-confirm {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-l) 100%);
+    color: var(--navy);
+    font-weight: 700;
+  }
+
+  .pin-btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(201,162,39,.3);
+  }
+
+  .pin-btn-confirm:active {
+    transform: translateY(0);
+  }
+
   /* ── NAV ── */
   nav {
     position: fixed; top: 0; width: 100%; z-index: 100;
@@ -2331,7 +2561,7 @@ const MEMBER_DATA = {
   },
   "عبيدة محي مزيد": {
     initials: "ع.م",
-    photo: "https://i.ibb.co/tp4mmpmw/image.jpg",
+    photo: "https://i.ibb.co/8L9HzhBp/IMG-20260522-WA0010.jpg",
     role: "مسؤول الميديا والتصميم",
     grade: "الصف الثاني الثانوي",
     bio: "المسؤول عن الهوية البصرية للجماعة وإنتاج المحتوى الرقمي. يجمع بين الإبداع التقني والذوق الفني الرفيع في تصميم المواد الإعلامية، ويحرص على أن تعكس هوية الجماعة بصورة احترافية.",
@@ -3791,6 +4021,7 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
         ${isCurrentUser ? `
           <button class="action-btn react-btn" onclick="showReactionsMenu('${messageId || 'temp'}', document.querySelector('[data-message-id=\"${messageId || 'temp'}\"]'), event)">😊 React</button>
           <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`')}\`)">↩️ رد</button>
+          <button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`)">📌 تثبيت</button>
           <button class="action-btn edit-btn" onclick="openEditModal('${messageId || 'temp'}', \`${msg.text.replace(/`/g, '\\`')}\`)">✏️ تعديل</button>
           <button class="action-btn delete-btn" onclick="deleteMessage('${messageId || 'temp'}')">🗑️ حذف</button>
         ` : `
@@ -5327,8 +5558,8 @@ function loadMembersListDropdown() {
       item.innerHTML = `
         <div class="member-avatar">${avatar}</div>
         <div class="member-info">
-          <div class="member-name">${member.name}</div>
-          <div class="member-bio ${!member.bio ? 'empty' : ''}">${bio}</div>
+          <div class="member-name" title="${member.name}">${member.name}</div>
+          <div class="member-bio ${!member.bio ? 'empty' : ''}" title="${bio}">${bio}</div>
         </div>
       `;
       
@@ -5975,17 +6206,17 @@ document.addEventListener('click', (e) => {
 
   .mobile-more-dropdown {
     position: absolute;
-    bottom: 100%;
+    top: 100%;
     right: 0;
     background: white;
     border-radius: 8px;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1350;
     display: flex;
     flex-direction: column;
     gap: 0;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-top: 8px;
     min-width: 150px;
   }
 
@@ -7867,6 +8098,14 @@ document.addEventListener('click', (e) => {
     transform: scale(0.9);
   }
 
+  .action-btn.pin-btn-action {
+    color: var(--gold);
+  }
+
+  .action-btn.pin-btn-action:hover {
+    background: rgba(201, 162, 39, 0.15);
+  }
+
   /* ── USER PREVIEW MODAL ── */
   .user-preview-modal {
     position: fixed;
@@ -8066,81 +8305,160 @@ document.addEventListener('click', (e) => {
     position: absolute;
     top: 60px;
     right: 60px;
-    width: 320px;
-    max-height: 500px;
+    width: 340px;
+    max-height: 550px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    box-shadow: 0 12px 48px rgba(17, 24, 128, 0.18);
     z-index: 1200;
     display: flex;
     flex-direction: column;
-    animation: slideDown .3s ease;
+    animation: slideDown .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(17, 24, 128, 0.1);
   }
 
   @keyframes slideDown {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-16px) scale(0.95);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
     }
   }
 
   .members-list-header {
-    padding: 16px;
-    border-bottom: 2px solid var(--bg);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(17, 24, 128, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: linear-gradient(135deg, rgba(17, 24, 128, 0.03) 0%, rgba(201, 162, 39, 0.02) 100%);
   }
 
   .members-list-header h4 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--navy);
     font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.3px;
   }
 
   .members-list-close {
-    background: none;
+    background: rgba(17, 24, 128, 0.05);
     border: none;
     color: var(--muted);
     cursor: pointer;
     font-size: 1.2rem;
-    padding: 0;
-    width: 30px;
-    height: 30px;
+    padding: 6px 8px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color .2s;
+    border-radius: 8px;
+    transition: all .2s;
   }
 
   .members-list-close:hover {
     color: var(--navy);
+    background: rgba(17, 24, 128, 0.1);
+    transform: scale(1.05);
   }
 
   .members-list-content {
     overflow-y: auto;
     flex: 1;
-    padding: 8px;
+    padding: 6px;
+  }
+
+  .members-list-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .members-list-content::-webkit-scrollbar-track {
+    background: rgba(17, 24, 128, 0.03);
+    border-radius: 10px;
+  }
+
+  .members-list-content::-webkit-scrollbar-thumb {
+    background: rgba(17, 24, 128, 0.2);
+    border-radius: 10px;
+  }
+
+  .members-list-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(17, 24, 128, 0.35);
   }
 
   .member-item {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background .2s;
-    margin-bottom: 8px;
+    transition: all .15s;
+    margin-bottom: 2px;
   }
 
   .member-item:hover {
-    background: var(--bg);
+    background: linear-gradient(135deg, rgba(17, 24, 128, 0.08) 0%, rgba(201, 162, 39, 0.05) 100%);
+    transform: translateX(-4px);
+  }
+
+  .member-item:active {
+    transform: translateX(-4px) scale(0.98);
+  }
+
+  .member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--royal) 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(17, 24, 128, 0.15);
+  }
+
+  .member-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .member-name {
+    font-size: 0.9rem;
+    color: var(--navy);
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .member-bio {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .member-bio.empty {
+    color: #bbb;
+    font-style: italic;
+    opacity: 0.7;
   }
 
 
@@ -8590,10 +8908,67 @@ document.addEventListener('click', (e) => {
     }
 
     .members-list-dropdown {
-      width: 90vw;
+      position: fixed;
+      top: auto;
+      right: 0 !important;
+      left: 0;
+      bottom: 0;
+      width: 100%;
       max-width: none;
-      max-height: 70vh;
-      right: 5vw !important;
+      max-height: 75vh;
+      border-radius: 24px 24px 0 0;
+      animation: slideUpMobile .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    @keyframes slideUpMobile {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .members-list-header {
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      background: white;
+      border-radius: 24px 24px 0 0;
+    }
+
+    .members-list-header::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      background: rgba(17, 24, 128, 0.2);
+      border-radius: 2px;
+    }
+
+    .member-item {
+      padding: 10px 12px;
+      margin-bottom: 4px;
+    }
+
+    .member-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 0.9rem;
+    }
+
+    .member-name {
+      font-size: 0.95rem;
+    }
+
+    .member-bio {
+      font-size: 0.8rem;
     }
 
     .chat-settings-page {
@@ -8622,5 +8997,216 @@ document.addEventListener('click', (e) => {
   </div>
 </div>
 
-</body>
-</html>
+<!-- PINNED MESSAGE BAR -->
+<div id="pinned-message-bar" class="pinned-message-bar" onclick="scrollToPinnedMessage()">
+  <div class="pinned-icon">📌</div>
+  <div class="pinned-content">
+    <div class="pinned-name" id="pinned-sender">اسم المرسل</div>
+    <div class="pinned-text" id="pinned-preview">محتوى الرسالة المثبتة</div>
+  </div>
+  <button class="pinned-close-btn" onclick="unpinMessage(event)" title="إزالة التثبيت">✕</button>
+</div>
+
+<!-- PIN MESSAGE MODAL -->
+<div id="pin-modal" class="pin-modal">
+  <div class="pin-modal-content">
+    <div class="pin-modal-header">
+      <h3>📌 تثبيت الرسالة</h3>
+      <button class="pin-close-btn" onclick="closePinModal()">✕</button>
+    </div>
+    
+    <div class="pin-duration-group">
+      <label class="pin-duration-label">اختر مدة التثبيت:</label>
+      <div class="pin-duration-options">
+        <button class="pin-duration-btn selected" data-duration="86400" onclick="selectDuration(this, 86400)">
+          ⏱️ 24 ساعة
+        </button>
+        <button class="pin-duration-btn" data-duration="604800" onclick="selectDuration(this, 604800)">
+          📅 7 أيام
+        </button>
+        <button class="pin-duration-btn" data-duration="2592000" onclick="selectDuration(this, 2592000)">
+          🗓️ 30 يوم
+        </button>
+      </div>
+    </div>
+
+    <div class="pin-actions">
+      <button class="pin-btn pin-btn-cancel" onclick="closePinModal()">إلغاء</button>
+      <button class="pin-btn pin-btn-confirm" onclick="confirmPin()">تثبيت الآن</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────
+// PIN MESSAGE FEATURE
+// ──────────────────────────────────────────────────
+
+const ADMIN_EMAIL = 'obida@schoolradio.com';
+let currentPinDuration = 86400; // default 24 hours
+let pendingPinData = null;
+
+function openPinModal(messageId, senderName, text) {
+  // Check if user is admin
+  if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+    alert('⛔ فقط ' + ADMIN_EMAIL + ' يقدر يثبت الرسائل');
+    return;
+  }
+
+  pendingPinData = {
+    messageId: messageId,
+    senderName: senderName,
+    text: text
+  };
+
+  currentPinDuration = 86400; // reset to 24 hours
+  
+  // Reset selection
+  document.querySelectorAll('.pin-duration-btn').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  document.querySelector('[data-duration="86400"]').classList.add('selected');
+
+  document.getElementById('pin-modal').classList.add('active');
+}
+
+function closePinModal() {
+  document.getElementById('pin-modal').classList.remove('active');
+  pendingPinData = null;
+}
+
+function selectDuration(btn, seconds) {
+  // Remove selection from all buttons
+  document.querySelectorAll('.pin-duration-btn').forEach(b => {
+    b.classList.remove('selected');
+  });
+  
+  // Add selection to clicked button
+  btn.classList.add('selected');
+  currentPinDuration = seconds;
+}
+
+function confirmPin() {
+  if (!pendingPinData || !db) {
+    alert('حدث خطأ، حاول مرة أخرى');
+    return;
+  }
+
+  try {
+    const expiresAt = Date.now() + (currentPinDuration * 1000);
+    
+    const pinData = {
+      messageId: pendingPinData.messageId,
+      senderName: pendingPinData.senderName,
+      text: pendingPinData.text,
+      pinnedAt: Date.now(),
+      expiresAt: expiresAt,
+      duration: currentPinDuration
+    };
+
+    // Save to Firebase
+    db.ref(`chats/${CHAT_ID}/pinnedMessage`).set(pinData, (error) => {
+      if (error) {
+        console.error('Error pinning message:', error);
+        alert('❌ خطأ في تثبيت الرسالة');
+      } else {
+        console.log('✅ تم تثبيت الرسالة');
+        closePinModal();
+        loadPinnedMessage();
+      }
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    alert('❌ حدث خطأ');
+  }
+}
+
+function loadPinnedMessage() {
+  if (!db) return;
+
+  db.ref(`chats/${CHAT_ID}/pinnedMessage`).on('value', snapshot => {
+    const pinnedData = snapshot.val();
+    
+    if (pinnedData) {
+      const now = Date.now();
+      
+      // Check if expired
+      if (pinnedData.expiresAt && now > pinnedData.expiresAt) {
+        // Delete expired pinned message
+        db.ref(`chats/${CHAT_ID}/pinnedMessage`).remove();
+        hidePinnedBar();
+        return;
+      }
+
+      // Display pinned message
+      displayPinnedBar(pinnedData);
+    } else {
+      hidePinnedBar();
+    }
+  });
+}
+
+function displayPinnedBar(pinData) {
+  const bar = document.getElementById('pinned-message-bar');
+  document.getElementById('pinned-sender').textContent = pinData.senderName;
+  document.getElementById('pinned-preview').textContent = pinData.text;
+  
+  bar.classList.add('active');
+  bar.setAttribute('data-message-id', pinData.messageId);
+}
+
+function hidePinnedBar() {
+  document.getElementById('pinned-message-bar').classList.remove('active');
+}
+
+function scrollToPinnedMessage() {
+  const bar = document.getElementById('pinned-message-bar');
+  const messageId = bar.getAttribute('data-message-id');
+  
+  if (messageId) {
+    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageEl) {
+      messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Highlight the message
+      messageEl.style.background = 'rgba(201, 162, 39, 0.1)';
+      messageEl.style.borderLeft = '4px solid var(--gold)';
+      messageEl.style.paddingLeft = '12px';
+      
+      setTimeout(() => {
+        messageEl.style.background = '';
+        messageEl.style.borderLeft = '';
+        messageEl.style.paddingLeft = '';
+      }, 2000);
+    }
+  }
+}
+
+function unpinMessage(event) {
+  event.stopPropagation();
+  
+  if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+    alert('⛔ فقط ' + ADMIN_EMAIL + ' يقدر يلغي التثبيت');
+    return;
+  }
+
+  if (confirm('هل تريد إزالة تثبيت هذه الرسالة؟')) {
+    db.ref(`chats/${CHAT_ID}/pinnedMessage`).remove((error) => {
+      if (error) {
+        console.error('Error unpinning:', error);
+        alert('❌ خطأ في إزالة التثبيت');
+      } else {
+        console.log('✅ تم إزالة التثبيت');
+        hidePinnedBar();
+      }
+    });
+  }
+}
+
+// Initialize pinned message on load
+setTimeout(() => {
+  loadPinnedMessage();
+}, 1000);
+
+</script>
