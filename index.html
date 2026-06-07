@@ -1704,9 +1704,6 @@
       </div>
       
       <!-- الأزرار العادية -->
-      <button class="chat-members-list-btn" onclick="toggleMembersList()" title="الأعضاء">
-        👥 <span id="chat-members-list-count">0</span>
-      </button>
       <button class="chat-settings-btn" onclick="openChatSettings()" title="إعدادات الشات">
         ⚙️
       </button>
@@ -1729,9 +1726,6 @@
         <div class="mobile-more-dropdown" id="mobileMoreDropdown" style="display: none;">
           <button onclick="toggleMobileSearchModal(); toggleMobileMoreMenu();" class="mobile-menu-item">
             🔍 بحث
-          </button>
-          <button onclick="toggleMembersList(); toggleMobileMoreMenu();" class="mobile-menu-item">
-            👥 الأعضاء
           </button>
           <button onclick="toggleMembersCounter(); toggleMobileMoreMenu();" class="mobile-menu-item">
             👥 عدد الأعضاء
@@ -3681,6 +3675,7 @@ function openChat() {
   if (chatModal) {
     chatModal.classList.add('show');
     loadMessages();
+    loadPinnedMessage(); // ✅ تحميل الرسائل المثبتة عند فتح الشات
     
     // طلب إذن التنبيهات
     requestNotificationPermission();
@@ -4093,7 +4088,7 @@ function addMessageToUI(msg, isNew = false, messageId = null) {
         ${isCurrentUser ? `
           <button class="action-btn react-btn" onclick="showReactionsMenu('${messageId || 'temp'}', document.querySelector('[data-message-id=\"${messageId || 'temp'}\"]'), event)">😊 React</button>
           <button class="action-btn reply-btn" onclick="startReply('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`')}\`)">↩️ رد</button>
-          ${currentUser && currentUser.email === 'obida@schoolradio.com' ? `<button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`, '${msg.senderName}')">📌 تثبيت</button>` : ''}
+          ${currentUser && currentUser.email === 'obida@schoolradio.com' ? `<button class="action-btn pin-btn-action" onclick="openPinModal('${messageId || 'temp'}', '${msg.senderName || 'مستخدم'}', \`${msg.text.replace(/`/g, '\\`').substring(0, 100)}\`)">📌 تثبيت</button>` : ''}
           <button class="action-btn edit-btn" onclick="openEditModal('${messageId || 'temp'}', \`${msg.text.replace(/`/g, '\\`')}\`)">✏️ تعديل</button>
           <button class="action-btn delete-btn" onclick="deleteMessage('${messageId || 'temp'}')">🗑️ حذف</button>
         ` : `
@@ -9248,37 +9243,62 @@ function confirmPin() {
 }
 
 function loadPinnedMessage() {
-  if (!db) return;
+  if (!db) {
+    console.warn('Firebase not ready for loading pinned message');
+    return;
+  }
 
   db.ref(`chats/${CHAT_ID}/pinnedMessage`).on('value', snapshot => {
     const pinnedData = snapshot.val();
     
-    if (pinnedData) {
+    if (pinnedData && pinnedData.messageId) {
       const now = Date.now();
       
-      // Check if expired
+      // التحقق من انتهاء صلاحية الرسالة
       if (pinnedData.expiresAt && now > pinnedData.expiresAt) {
-        // Delete expired pinned message
+        console.log('⏰ Pinned message expired, removing...');
         db.ref(`chats/${CHAT_ID}/pinnedMessage`).remove();
         hidePinnedBar();
         return;
       }
 
-      // Display pinned message
+      // عرض الرسالة المثبتة
       displayPinnedBar(pinnedData);
+      
+      // حساب الوقت المتبقي
+      if (pinnedData.expiresAt) {
+        const timeLeft = pinnedData.expiresAt - now;
+        const minutesLeft = Math.round(timeLeft / 60000);
+        console.log(`📌 Pinned message will expire in ${minutesLeft} minutes`);
+      }
     } else {
       hidePinnedBar();
+      console.log('✅ No pinned message');
     }
   });
 }
 
 function displayPinnedBar(pinData) {
   const bar = document.getElementById('pinned-message-bar');
-  document.getElementById('pinned-sender').textContent = pinData.senderName;
-  document.getElementById('pinned-preview').textContent = pinData.text;
   
+  // تحديث النصوص
+  document.getElementById('pinned-sender').textContent = pinData.senderName || 'مستخدم';
+  document.getElementById('pinned-preview').textContent = pinData.text || 'لا يوجد محتوى';
+  
+  // تخزين messageId بشكل آمن
+  if (pinData.messageId) {
+    bar.setAttribute('data-message-id', String(pinData.messageId).trim());
+  }
+  
+  // إظهار الشريط
   bar.classList.add('active');
-  bar.setAttribute('data-message-id', pinData.messageId);
+  
+  // تسجيل للتصحيح
+  console.log('📌 Pinned message displayed:', {
+    messageId: pinData.messageId,
+    senderName: pinData.senderName,
+    preview: pinData.text?.substring(0, 50) + '...'
+  });
 }
 
 function hidePinnedBar() {
@@ -9289,22 +9309,66 @@ function scrollToPinnedMessage() {
   const bar = document.getElementById('pinned-message-bar');
   const messageId = bar.getAttribute('data-message-id');
   
-  if (messageId) {
-    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
-    if (messageEl) {
-      messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Highlight the message
-      messageEl.style.background = 'rgba(201, 162, 39, 0.1)';
-      messageEl.style.borderLeft = '4px solid var(--gold)';
-      messageEl.style.paddingLeft = '12px';
-      
-      setTimeout(() => {
-        messageEl.style.background = '';
-        messageEl.style.borderLeft = '';
-        messageEl.style.paddingLeft = '';
-      }, 2000);
+  if (!messageId) {
+    console.warn('No message ID found');
+    return;
+  }
+  
+  // البحث عن الرسالة بـ data-message-id
+  let messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+  
+  // إذا لم يتم العثور عليها، جرب البحث بطرق بديلة
+  if (!messageEl) {
+    console.warn(`Message not found with ID: ${messageId}`);
+    
+    // جرب البحث في جميع الرسائل
+    const allMessages = document.querySelectorAll('[data-message-id]');
+    console.log(`Found ${allMessages.length} messages in DOM. Searching for: "${messageId}"`);
+    
+    for (let msg of allMessages) {
+      const id = msg.getAttribute('data-message-id');
+      console.log(`Checking message ID: "${id}"`);
+      if (String(id).trim() === String(messageId).trim()) {
+        messageEl = msg;
+        console.log('✅ Found message on second attempt');
+        break;
+      }
     }
+  }
+  
+  if (messageEl) {
+    // التمرير إلى الرسالة
+    const container = document.getElementById('messagesContainer');
+    if (container) {
+      const elementTop = messageEl.offsetTop;
+      const containerHeight = container.clientHeight;
+      const targetScroll = elementTop - (containerHeight / 2) + (messageEl.clientHeight / 2);
+      
+      container.scrollTop = targetScroll;
+    } else {
+      messageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // تحديد الرسالة بتأثير بصري
+    messageEl.style.transition = 'all 0.3s ease';
+    messageEl.style.background = 'rgba(201, 162, 39, 0.2)';
+    messageEl.style.borderLeft = '4px solid var(--gold)';
+    messageEl.style.paddingLeft = 'calc(12px - 4px)';
+    
+    setTimeout(() => {
+      messageEl.style.background = 'rgba(201, 162, 39, 0.1)';
+      messageEl.style.borderLeft = '2px solid var(--gold)';
+    }, 600);
+    
+    setTimeout(() => {
+      messageEl.style.background = '';
+      messageEl.style.borderLeft = '';
+      messageEl.style.paddingLeft = '';
+      messageEl.style.transition = '';
+    }, 3000);
+  } else {
+    console.error('❌ Pinned message not found in DOM with ID:', messageId);
+    alert('⚠️ لم يتم العثور على الرسالة المثبتة. قد تكون قد حُذفت أو أعيد تحميل الصفحة');
   }
 }
 
@@ -9331,10 +9395,29 @@ function unpinMessage(event) {
   }
 }
 
-// Initialize pinned message on load
-setTimeout(() => {
-  loadPinnedMessage();
-}, 1000);
+// دالة لتصحيح مشاكل الرسائل المثبتة
+function debugPinnedMessage() {
+  const bar = document.getElementById('pinned-message-bar');
+  const messageId = bar?.getAttribute('data-message-id');
+  
+  console.log('=== 🔍 تصحيح الرسائل المثبتة ===');
+  console.log('الـ messageId المُخزّن:', messageId);
+  
+  if (messageId) {
+    const messageEl = document.querySelector(`[data-message-id="${messageId}"]`);
+    console.log('الرسالة موجودة؟', !!messageEl);
+    
+    if (messageEl) {
+      console.log('محتوى الرسالة:', messageEl.textContent);
+    } else {
+      console.warn('⚠️ الرسالة غير موجودة في الـ DOM');
+      console.log('جميع الرسائل الموجودة:');
+      document.querySelectorAll('[data-message-id]').forEach((el, idx) => {
+        console.log(`  ${idx}: ID="${el.getAttribute('data-message-id')}"`);
+      });
+    }
+  }
+}
 
 // ──────────────────────────────────────────────────
 // SYSTEM MESSAGE FEATURE
