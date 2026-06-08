@@ -1660,6 +1660,16 @@
 
 <!-- ── CHAT MODAL ── -->
 <div id="chat-modal" class="chat-modal">
+  <!-- PINNED MESSAGE BAR -->
+  <div id="pinned-message-bar" class="pinned-message-bar" onclick="scrollToPinnedMessage()">
+    <div class="pinned-icon">📌</div>
+    <div class="pinned-content">
+      <div class="pinned-name" id="pinned-sender">اسم المرسل</div>
+      <div class="pinned-text" id="pinned-preview">محتوى الرسالة المثبتة</div>
+    </div>
+    <button class="pinned-close-btn" onclick="unpinMessage(event)" title="إزالة التثبيت">✕</button>
+  </div>
+
   <div class="chat-wrapper">
     <div class="chat-header">
       <!-- الـ Header الأساسي -->
@@ -2590,7 +2600,7 @@ const MEMBER_DATA = {
   },
   "عبيدة محي مزيد": {
     initials: "ع.م",
-    photo: "https://i.ibb.co/tp4mmpmw/image.jpg",
+    photo: "https://i.ibb.co/8L9HzhBp/IMG-20260522-WA0010.jpg",
     role: "مسؤول الميديا والتصميم",
     grade: "الصف الثاني الثانوي",
     bio: "المسؤول عن الهوية البصرية للجماعة وإنتاج المحتوى الرقمي. يجمع بين الإبداع التقني والذوق الفني الرفيع في تصميم المواد الإعلامية، ويحرص على أن تعكس هوية الجماعة بصورة احترافية.",
@@ -9116,17 +9126,8 @@ document.addEventListener('click', (e) => {
 </div>
 
 <!-- PINNED MESSAGE BAR -->
-<div id="pinned-message-bar" class="pinned-message-bar" onclick="scrollToPinnedMessage()">
-  <div class="pinned-icon">📌</div>
-  <div class="pinned-content">
-    <div class="pinned-name" id="pinned-sender">اسم المرسل</div>
-    <div class="pinned-text" id="pinned-preview">محتوى الرسالة المثبتة</div>
-  </div>
-  <button class="pinned-close-btn" onclick="unpinMessage(event)" title="إزالة التثبيت">✕</button>
-</div>
 
-<!-- PIN MESSAGE MODAL -->
-<div id="pin-modal" class="pin-modal">
+<div id="pin-modal" class="pin-modal hidden">
   <div class="pin-modal-content">
     <div class="pin-modal-header">
       <h3>📌 تثبيت الرسالة</h3>
@@ -9230,7 +9231,9 @@ function confirmPin() {
       } else {
         console.log('✅ تم تثبيت الرسالة');
         closePinModal();
-        loadPinnedMessage();
+        
+        // عرض الرسالة المثبتة فوراً بدون انتظار listener
+        displayPinnedBar(pinData);
         
         // إضافة رسالة نظام في الشات
         addSystemMessage('Admin pinned a message');
